@@ -1,0 +1,37 @@
+{
+  "name": "@o4s/keeper",
+  "version": "0.0.2",
+  "description": "Keeper is a function wrapper, which caches the response on redis",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "publishConfig": {
+    "registry": "http://registry.o4s.in:8081/repository/o4s-dev-internal/"
+  },
+  "scripts": {
+    "ts-node": "ts-node",
+    "prestart": "npm run build",
+    "start": "node .",
+    "test": "mocha -r ts-node/register tests/**/*.spec.ts",
+    "build": "npm run test && tsc",
+    "watch": "tsc -w -p ./src -p ./tsconfig.json"
+  },
+  "author": "shubham",
+  "license": "ISC",
+  "files": [
+    "dist/**/*"
+  ],
+  "dependencies": {
+    "chai": "^4.2.0",
+    "ioredis": "^4.16.2",
+    "ioredis-mock": "^4.19.0",
+    "mocha": "^7.1.1",
+    "ramda": "^0.27.0",
+    "ts-node": "^8.8.2",
+    "tslint": "^6.1.1",
+    "typescript": "^3.8.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^25.2.1",
+    "@types/ramda": "^0.27.3"
+  }
+}
