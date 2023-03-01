@@ -8,7 +8,7 @@ const l1 = function listener() {
   counter++
 }
 eventEmitter.addListener("ping", l1)
-const redis = new RedisMock()
+const redis = new RedisMock.default()
 
 const getCache = (a: string) => redis
 
