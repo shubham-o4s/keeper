@@ -16,7 +16,7 @@
     "forceConsistentCasingInFileNames": true,
     "allowUnreachableCode": false,
     "noEmitOnError": true,
-    "types": ["jest"]
+    "types": ["mocha"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/tests/*"]

@@ -1,4 +1,6 @@
 import * as chai from "chai"
+import * as sinon from "sinon"
+import * as Pool from "../src/pool"
 import { Keeper } from "../src/index"
 import * as RedisMock from "ioredis-mock"
 import * as events from "events"
@@ -8,9 +10,13 @@ const l1 = function listener() {
   counter++
 }
 eventEmitter.addListener("ping", l1)
-const redis = new RedisMock.default()
 
-const getCache = (a: string) => redis
+const createRedisStub = sinon.stub(Pool, 'createRedis').callsFake(
+  function () {
+    return new RedisMock.default()
+  })
+
+const cacheUri = "redis://localhost:6379/12"
 
 function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -43,7 +49,7 @@ describe("testing data save on redis", () => {
         uri: "test-redis",
         options: { parseJSON: true, expire: 1 }
       },
-      getCache,
+      cacheUri,
       keygen,
       fn
     )
@@ -56,7 +62,7 @@ describe("testing data save on redis", () => {
         uri: "test-redis",
         options: { parseJSON: true, expire: 1 }
       },
-      getCache,
+      cacheUri,
       keygen,
       fn
     )
@@ -69,7 +75,7 @@ describe("testing data save on redis", () => {
         uri: "test-redis",
         options: { parseJSON: true, expire: 1 }
       },
-      getCache,
+      cacheUri,
       keygen,
       fn
     )
@@ -84,7 +90,7 @@ describe("testing data save on redis", () => {
         uri: "test-redis",
         options: { parseJSON: true, expire: 1 }
       },
-      getCache,
+      cacheUri,
       keygen,
       fn
     )
@@ -97,7 +103,7 @@ describe("testing data save on redis", () => {
         uri: "test-redis",
         options: { parseJSON: true, expire: 0 }
       },
-      getCache,
+      cacheUri,
       keygen,
       fn
     )
@@ -105,5 +111,32 @@ describe("testing data save on redis", () => {
     await delay(1500)
     const result = await ans(3)
     chai.assert.equal(result, "fn-result-3", "value retained after 1.5s")
+  })
+  it("multi chain should work fine", async () => {
+    const ioRedisPoolOpts = Pool.IORedisPoolOptions.fromUrl(cacheUri)
+      // This accepts the RedisOptions class from ioredis as an argument
+      // https://github.com/luin/ioredis/blob/master/lib/redis/RedisOptions.ts
+      .withIORedisOptions({
+        retryStrategy: (times) => {
+          const delay = Math.min(times * 50, 2000)
+          return delay
+        }
+      })
+      // This accepts the Options class from @types/generic-pool as an argument
+      // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/generic-pool/index.d.ts#L36
+      .withPoolOptions({
+        min: 2,
+        max: 15,
+        acquireTimeoutMillis: 1000,
+        maxWaitingClients: 5
+      })
+    const pool = new Pool.IORedisPool(ioRedisPoolOpts)
+    const pipelineResult = await pool.execCommands([["set", "testMulti", "5"], ["get", "testMulti"], ["incr", "testMulti"], ["decr", "testMulti"]])
+    await delay(1500)
+    const getResult = await pool.get("testMulti")
+    chai.assert.equal(getResult, "5", "testMulti on pool should get the set value")
+  })
+  after(() => {
+    createRedisStub.restore()
   })
 })

@@ -1,4 +1,5 @@
-import * as _Redis from "ioredis";
+import { IORedisPool } from "./pool";
+export declare const getCachePool: (uri: string) => Promise<IORedisPool>;
 export declare const Keeper: <T>(dat: {
     uri: string;
     options: {
@@ -6,4 +7,4 @@ export declare const Keeper: <T>(dat: {
         expire: number;
         ignoreCache?: boolean;
     };
-}, getCache: (...args: any[]) => _Redis.Redis, keygen: (...args: any[]) => string, fn: (...args: any[]) => Promise<T>) => (...args: any[]) => Promise<T>;
+}, cacheUri: string, keygen: (...args: any[]) => string, fn: (...args: any[]) => Promise<T>) => (...args: any[]) => Promise<T>;
