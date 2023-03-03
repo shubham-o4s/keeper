@@ -138,6 +138,12 @@ export class IORedisPool extends EventEmitter {
     }
   }
 
+  /**
+   * Use only if you know what you're doing.
+   * DONT FORGET TO RELEASE CONNECTION RIGHT AFTER
+   * @param priority 
+   * @returns 
+   */
   getConnection(priority?: number) {
     return this.pool.acquire(priority)
   }
