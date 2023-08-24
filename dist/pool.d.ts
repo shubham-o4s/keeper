@@ -37,9 +37,15 @@ export declare class IORedisPool extends EventEmitter {
         max: number;
         min: number;
     };
+    /**
+     * Use only if you know what you're doing.
+     * DONT FORGET TO RELEASE CONNECTION RIGHT AFTER
+     * @param priority
+     * @returns
+     */
     getConnection(priority?: number): Promise<Redis>;
     del(keys: string[]): Promise<number>;
-    set(key: string, value: string | number | Buffer): Promise<"OK">;
+    set(key: string, value: string | number | Buffer, keepttl?: boolean): Promise<any>;
     setWithSeconds(key: string, value: string | number | Buffer, secondsToken: "EX", seconds: number | string): Promise<"OK">;
     setex(key: string, ttl: number, value: number | string | Buffer): Promise<"OK">;
     get(key: string): Promise<string | null>;

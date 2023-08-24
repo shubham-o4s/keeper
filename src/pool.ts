@@ -155,9 +155,14 @@ export class IORedisPool extends EventEmitter {
     return res
   }
 
-  async set(key: string, value: string | number | Buffer) {
+  async set(key: string, value: string | number | Buffer, keepttl: boolean = false) {
     const cache = await this.getConnection()
-    const res = await cache.set(key, value)
+    let res
+    if (keepttl) {
+      res = await cache.set(key, value, "KEEPTTL")
+    } else {
+      res = await cache.set(key, value)
+    }
     this.pool.release(cache)
     return res
   }
