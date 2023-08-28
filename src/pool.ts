@@ -159,7 +159,9 @@ export class IORedisPool extends EventEmitter {
     const cache = await this.getConnection()
     let res
     if (keepttl) {
-      res = await cache.set(key, value, "KEEPTTL")
+      // res = await cache.set(key, value, "KEEPTTL") TODO: this is available only from version 6
+      const ttl = await cache.ttl(key)
+      res = await cache.setex(key, ttl, value)
     } else {
       res = await cache.set(key, value)
     }
