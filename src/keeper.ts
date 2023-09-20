@@ -45,10 +45,7 @@ export const getCachePool = async (uri: string): Promise<IORedisPool> => {
 };
 
 export const Keeper = <T>(
-  dat: {
-    uri: string
-    options: { parseJSON: boolean; expire: number, ignoreCache?: boolean }
-  },
+  options: { parseJSON: boolean; expire: number, ignoreCache?: boolean },
   cacheUri: string,
   keygen: (...args: any[]) => string,
   fn: (...args: any[]) => Promise<T>
@@ -57,15 +54,15 @@ export const Keeper = <T>(
     const cache = await getCachePool(cacheUri)
     const cacheKey = keygen(args)
     const cacheResult = await cache.get(cacheKey)
-    const expireTime = dat.options.expire
-    const ignoreCache = dat.options.ignoreCache
+    const expireTime = options.expire
+    const ignoreCache = options.ignoreCache
 
     if (ignoreCache || nilOrEmpty(cacheResult)) {
       const result = await onCacheMiss({ cache, cacheKey, fn, expireTime }, ...args)
       return result
     }
 
-    if (dat.options.parseJSON) {
+    if (options.parseJSON) {
       return JSON.parse(cacheResult) as T
     }
     return (cacheResult as unknown) as T
